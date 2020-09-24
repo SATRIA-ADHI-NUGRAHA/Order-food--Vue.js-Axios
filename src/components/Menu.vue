@@ -20,31 +20,31 @@
           <h4 style="text-align: left;">
           <b>Add Item</b>
           </h4>
-          <form @submit="sendData" enctype="multipart/form-data">
+          <form @submit.prevent="insertData" enctype="multipart/form-data">
             <div class="m-2">
               <label>Name</label>
-              <input type="text" v-model="nama_produk"/>
+              <input type="text" v-model="input.nama_produk"/>
             </div>
             <div class="m-2">
               <label>Price</label>
-              <input type="text" v-model="harga"/>
+              <input type="text" v-model="input.harga"/>
             </div>
             <div class="m-2">
               <label>id category</label>
-              <input type="text" v-model="id_category"/>
+              <input type="text" v-model="input.id_category"/>
             </div>
-            <!-- <b-form-select v-model="id_category" class="mb-3 category-select">
+            <!-- <b-form-select v-model="input.category" class="mb-3 category-select">
               <b-form-select-option :value="null">Please select an option </b-form-select-option>
-              <b-form-select-option v-for="(item, index) in category" :key="index" :value="item.id_category">{{item.category}}</b-form-select-option>
-            </b-form-select> -->
+              <b-form-select-option v-for="(item, index) in allCategory" :key="index" :value="item.id_category">{{item.category}}</b-form-select-option>
+            </b-form-select><br><br> -->
             <div class="m-2">
               <label>File</label>
               <input type="file" @change="processFile($event)"/>
             </div>
             <span></span>
             <div class="form-button">
-              <input class="send" type="submit" value="Send"/>
-              <input class="cancel" type="button" value="cancel" @click="$emit('addclose')"/>
+              <b-button class="mt-3" type="submit" block @click="loadOnce" name="button">Add</b-button>
+              <input type="button" value="cancel" @click="$emit('addclose')" />
             </div>
           </form>
          </b-modal>
@@ -54,37 +54,53 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'Menu',
   data () {
     return {
-      nama_produk: null,
-      harga: null,
-      id_category: null,
-      gambar: null
+      input: {
+        nama_produk: null,
+        harga: null,
+        id_category: null,
+        gambar: null
+      }
     }
   },
+  computed: {
+    ...mapGetters({
+      allCategory: 'products/allCategory'
+    })
+  },
   methods: {
-    processFile (event) {
-      this.gambar = event.target.files[0]
-    },
-    sendData () {
-      const fd = new FormData()
-      fd.append('gambar', this.gambar)
-      fd.append('nama_produk', this.nama_produk)
-      fd.append('harga', this.harga)
-      fd.append('id_category', this.id_category)
-
-      axios.post('http://localhost:5000/product/insert', fd)
-        .then((result) => {
-          console.log(result)
+    ...mapActions({
+      insertData: 'products/sendData',
+      getCategory: 'products/getCategory'
+    }),
+    loadOnce () {
+      this.input.gambar = this.gambar
+      this.insertData(this.input)
+        .then((response) => {
+          console.log(response)
+          alert(response.data.message)
+          location.reload()
         })
         .catch((err) => {
           console.log(err)
         })
+    },
+    processFile (event) {
+      this.gambar = event.target.files[0]
     }
+    // insert () {
+    //   this.insertData(this.input).then((response) => {
+    //     console.log(response)
+    //     alert(response)
+    //   }).catch((err) => {
+    //     alert(err)
+    //   })
+    // }
   }
 }
 </script>

@@ -9,6 +9,7 @@
               <div class="col-lg-1 nopadding">
                 <div class="menu">
                   <Menu/>
+                <button class="btn btn-inline btn-xl" @click="onLogout()"><img src="../assets/logout.png" alt=""></button>
                 </div>
               </div>
               <div class="col-lg-11 nopadding">
@@ -29,57 +30,9 @@
                       </template>
                     </b-input-group>
                   </div>
-                  <div v-if="users.length === 0">
-                    Product not found ..!
-                  </div>
-                  <div v-else>
                     <div class="row">
-                      <div class="p-1" v-for="(item, index) in users" :key="index">
-                        <Card v-on:emitAdd="onAdd(item.id)" type="user" :product="item"/>
-                        <button type="button" class="btn btn-sm btn-danger ml-1 pull-right" data-toggle="modal" @click="deleteData(item.id)">Delete</button>
-                        <button class="btn btn-sm btn-success ml-1" v-b-modal.modal-update @click="update(item.id, index)">Update</button>
-                        <b-modal id="modal-update" title="BoostrapVue" hide-header hide-footer>
-                          <div>
-                          <form @submit="updateData" enctype="multipart/form-data">
-                            <div class="row">
-                              <div class="col-sm-12">
-                                <h4 class="text-left font-weight-bold mt-1 mb-4">Edit Data</h4>
-                              </div>
-                            </div>
-                            <div class="form-group row">
-                              <label for="nama_produk" class="col-sm-2 col-form-label"><strong>Name</strong></label>
-                              <div class="form-group row">
-                                <input type="text" class="form-control bg-input" id="nama_produk" v-model="oldproductname" />
-                              </div>
-                            </div>
-                            <div class="form-grup row">
-                              <label for="gambar" class="col-sm-2 col-form-label"><strong>Image</strong></label>
-                              <div class="col-sm-10">
-                                <input type="file" @change="process($event)" class="form-control bg-input" id="gambar"/>
-                              </div>
-                            </div>
-                            <div class="form-group row">
-                              <label for="harga" class="col-sm-2 col-form-label"><strong>Price</strong></label>
-                              <div class="form-group row">
-                                <input type="text" class="form-control bg-input" id="harga" v-model="oldharga" />
-                              </div>
-                            </div>
-                            <div class="form-group row">
-                              <label for="id_category" class="col-sm-2 col-form-label"><strong>id_category</strong></label>
-                              <div class="form-group row">
-                                <input type="text" class="form-control bg-input" id="id_category" v-model="oldidcategory" />
-                              </div>
-                            </div>
-                            <div class="form-button">
-                              <input class="send" type="submit" value="Send"/>
-                              <input class="cancel" type="button" value="cancel" @click="$emit('addclose')"/>
-                            </div>
-                          </form>
-                          </div>
-                        </b-modal>
-                      </div>
+                      <Card v-on:emitAdd="onAdd(item.id)" type="user" :product="item"/>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -95,7 +48,7 @@
                   <div class="cart-list">
                     <div class="d-flex">
                       <div class="p-2">
-                        <img :src="'http://localhost:5000/'+item.gambar" alt="" />
+                        <img :src="'http://18.205.153.196:3000/'+item.gambar" alt="" />
                       </div>
                       <div class="p-2 align-self-start">
                         <p class="name-list"><b>{{item.nama_produk}}</b></p>
@@ -139,18 +92,34 @@ import Cart from '../components/Cart'
 import Card from '../components/Card'
 import Orders1 from '../components/Orders1'
 import axios from 'axios'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   data () {
     return {
       users: [],
+      product: [],
       search: '',
       sortNama: 'nama_product',
       sortNama2: 'nama_product',
       sortPrice: 'harga',
       sortPrice2: 'harga',
-      cart: []
+      cart: [],
+      // testVid
+      inputTest: ''
     }
+  },
+  computed: {
+    ...mapState(['test']),
+    ...mapState({
+      testing: 'test',
+      getAllProduct: 'product'
+    }),
+    ...mapGetters({
+      getter2: 'getterTest',
+      produk: 'products/getAllProducts',
+      allProducts: 'products/getAllProducts'
+    })
   },
   components: {
     Navbar,
@@ -160,16 +129,32 @@ export default {
     Orders1
   },
   methods: {
-    fetchAPI () {
-      axios.get('http://localhost:5000/product/getall').then((response) => {
-        this.users = response.data.data
-        console.log(this.users)
-      }).catch((err) => {
-        console.log(err)
+    ...mapActions({
+      onClickTest: 'onClickTes',
+      onGetProduct: 'getProduct',
+      actionLogout: 'auth/logout',
+      actionGetAllProducts: 'products/getAllProducts',
+      actionDeleteData: 'products/deleteData'
+    }),
+    onLogout () {
+      this.actionLogout().then((responses) => {
+        alert('Logout Success')
+        window.location = '/login'
       })
     },
+    submitForm () {
+      this.onClickTest(this.inputTest)
+    },
+    // fetchAPI () {
+    //   axios.get('http://18.205.153.196:3000/product/getall').then((response) => {
+    //     this.users = response.data.data
+    //     console.log(this.users)
+    //   }).catch((err) => {
+    //     console.log(err)
+    //   })
+    // },
     searchProduct () {
-      axios.get('http://localhost:5000/product/getall?namaProduk=' + this.search).then((response) => {
+      axios.get('http://18.205.153.196:3000/product/getall?namaProduk=' + this.search).then((response) => {
         this.users = response.data.data
         console.log(this.users)
       }).catch((err) => {
@@ -177,7 +162,7 @@ export default {
       })
     },
     sortProduct1 () {
-      axios.get('http://localhost:5000/product/getall?type=&sort=nama_produk').then((response) => {
+      axios.get('http://18.205.153.196:3000/product/getall?type=&sort=nama_produk').then((response) => {
         this.users = response.data.data
         console.log(this.users)
       }).catch((err) => {
@@ -185,7 +170,7 @@ export default {
       })
     },
     sortProduct4 () {
-      axios.get('http://localhost:5000/product/getall?type=DESC&sort=nama_produk').then((response) => {
+      axios.get('http://18.205.153.196:3000/product/getall?type=DESC&sort=nama_produk').then((response) => {
         this.users = response.data.data
         console.log(this.users)
       }).catch((err) => {
@@ -193,7 +178,7 @@ export default {
       })
     },
     sortProduct2 () {
-      axios.get('http://localhost:5000/product/getall?type=&sort=harga').then((response) => {
+      axios.get('http://18.205.153.196:3000/product/getall?type=&sort=harga').then((response) => {
         this.users = response.data.data
         console.log(this.users)
       }).catch((err) => {
@@ -201,36 +186,36 @@ export default {
       })
     },
     sortProduct3 () {
-      axios.get('http://localhost:5000/product/getall?type=DESC&sort=harga').then((response) => {
+      axios.get('http://18.205.153.196:3000/product/getall?type=DESC&sort=harga').then((response) => {
         this.users = response.data.data
         console.log(this.users)
       }).catch((err) => {
         console.log(err)
       })
     },
-    update (id, index) {
-      this.id_update = id
-      this.oldproductname = this.data[index].nama_produk
-      this.oldgambar = this.data[index].image
-      this.oldharga = this.data[index].harga
-      this.oldidcategory = this.data[index].id_category
-    },
-    updateData () {
-      const fd = new FormData()
-      fd.append('nama_produk', this.oldproductname)
-      fd.append('gambar', this.gambar)
-      fd.append('harga', this.oldharga)
-      fd.append('id_category', this.id_category)
-      console.log(this.oldproductname)
-      console.log(this.image)
-      console.log(this.oldharga)
-      console.log(this.id_category)
-      axios.patch(`http://localhost:5000/product/update/${this.id_update}`, fd).then((result) => {
-        console.log(result)
-      }).catch((err) => {
-        console.log(err)
-      })
-    },
+    // update (id, index) {
+    //   this.id_update = id
+    //   this.oldproductname = this.data[index].nama_produk
+    //   this.oldgambar = this.data[index].image
+    //   this.oldharga = this.data[index].harga
+    //   this.oldidcategory = this.data[index].id_category
+    // },
+    // updateData () {
+    //   const fd = new FormData()
+    //   fd.append('nama_produk', this.oldproductname)
+    //   fd.append('gambar', this.gambar)
+    //   fd.append('harga', this.oldharga)
+    //   fd.append('id_category', this.id_category)
+    //   console.log(this.oldproductname)
+    //   console.log(this.image)
+    //   console.log(this.oldharga)
+    //   console.log(this.id_category)
+    //   axios.patch(`http://18.205.153.196:3000/product/update/${this.id_update}`, fd).then((result) => {
+    //     console.log(result)
+    //   }).catch((err) => {
+    //     console.log(err)
+    //   })
+    // },
     // sendData () {
     //   if (this.nama_produk == null) {
     //     this.nama_produk = this.dataToEdit.nama_produk
@@ -244,7 +229,7 @@ export default {
     //   formdata.append('id_category', this.id_category)
     //   formdata.append('harga', this.harga)
     //   formdata.append('gambar', this.gambar)
-    //   axios.patch(`http://localhost:5000/product/update/${this.dataToEdit}`, formdata)
+    //   axios.patch(`http://18.205.153.196:3000/product/update/${this.dataToEdit}`, formdata)
     //     .then((res) => {
     //       console.log(res.data)
     //     })
@@ -253,7 +238,7 @@ export default {
     //     })
     // },
     deleteData (id) {
-      axios.delete(`http://localhost:5000/product/delete/${id}`).then((response) => {
+      axios.delete(`http://18.205.153.196:3000/product/delete/${id}`).then((response) => {
         console.log(response.data)
       }).catch((err) => { console.log(err) })
     },
@@ -297,17 +282,19 @@ export default {
     }
   },
   mounted () {
-    this.fetchAPI()
+    // this.fetchAPI()
+    this.onGetProduct()
+    this.actionGetAllProducts()
 
-    axios
-      .get('http://localhost:5000/category/getall')
-      .then((response) => this.setCategory(response.data.data))
-      .catch((err) => console.log(err))
+    // axios
+    //   .get('http://18.205.153.196:3000/category/getall')
+    //   .then((response) => this.setCategory(response.data.data))
+    //   .catch((err) => console.log(err))
 
-    axios
-      .get(`http://localhost:5000/products/getdetail/${this.idtoedit}`)
-      .then((response) => this.latesData(response.data.data[0]))
-      .catch((err) => console.log(err))
+    // axios
+    //   .get(`http://18.205.153.196:3000/products/getdetail/${this.idtoedit}`)
+    //   .then((response) => this.latesData(response.data.data[0]))
+    //   .catch((err) => console.log(err))
   }
 }
 </script>
