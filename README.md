@@ -47,4 +47,5 @@ Modal
 ![pos4](https://user-images.githubusercontent.com/67420884/96658666-513a3980-136f-11eb-9586-5d78580fecfb.PNG)
 
 Responsive
+
 ![pos5](https://user-images.githubusercontent.com/67420884/96658669-539c9380-136f-11eb-945f-70eff66c850f.PNG)
